@@ -1,11 +1,10 @@
-#Simple Strategy
+# Simple Strategy
 A simple strategy for crypto arbitrage
-##Run
-Market data aggregator gather data from multiple exchanges and combine them into one single message based on time. To run the subscriber to receive market data from okx and huobi:
-``java -jar subscriber-simple-1.0.jar``
-Note that `java --version` should be 11. Rabbitmq are required. The source code of the
-of the jar is available at `https://github.com/Daniel-YH-Cai/cryptows`
-##Market Data
+## Run
+* Market data aggregator gather data from multiple exchanges and combine them into one single message based on time. To run the subscriber to receive market data from okx and huobi:``java -jar subscriber-simple-1.0.jar``<br>
+* Note that `java --version` should be 11. Rabbitmq is required. <br>
+*  The source code of the of the jar is available at `https://github.com/Daniel-YH-Cai/cryptows`
+## Market Data
 After the Market data aggregator is started, it will push data in the following format:
 ```
 {
