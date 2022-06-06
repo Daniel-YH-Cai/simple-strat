@@ -23,4 +23,92 @@ After the Market data aggregator is started, it will push data in the following 
 ```
 Here `"ts"` is the timestamp of the ticker in milliseconds (not the time when the message was received or sent by server).
 In this example, the timestamp of huobi and okx differs by 500ms. Part of the reason is system latency. Moreover, huobi and okx push data at different rates which might also lead to timestamp misalignment.
+## Simple Strategy explained
+* Simple strategy make trading decision based on every individual market data. 
+```
+    def strategy(self,body):
+        self._parseInput(body)
+        huobi_ticks=self._huobi_ask_bid()
+        okx_ticks=self._okx_ask_bid()
+        try:
+            print("-------------------------------------------------------------------------------------------")
+            if huobi_ticks['asks'][0][PRICE]>okx_ticks['bids'][0][PRICE] or huobi_ticks['bids'][0][PRICE]>okx_ticks['asks'][0][PRICE]:
+                logging.info("Huobi sell order at " +str(huobi_ticks['asks'][0][PRICE]))
+                logging.info("okx buy order at "+str(okx_ticks['bids'][0][PRICE]))
+            elif huobi_ticks['asks'][0][PRICE]<okx_ticks['bids'][0][PRICE] or huobi_ticks['bids'][0][PRICE]<okx_ticks['asks'][0][PRICE]:
+                logging.info("Huobi buy order at "+str(huobi_ticks['asks'][0][PRICE]))
+                logging.info("okx sell order at "+str(okx_ticks['bids'][0][PRICE]))
+
+        except IndexError:
+            logging.info("No asks or bids")
+```
+* Result:
+Sell and buy order are made per message. Note that no actual order is submitted to the exchanges. Ideally, a strategy should also monitor whether an order is excuted successfully yet this is not included in this demo (TODO).
+
+```
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31400.6
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31396.6
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31397.4
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31397.3
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31400.6
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31388.8
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31188.2
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31366.8
+-------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31349.5
+INFO:root:Huobi sell order at 31402.0
+INFO:root:okx buy order at 31394.2
+-------------------------------------------------------------------------------------------
+INFO:root:No asks or bids
+-------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi buy order at 31402.0
+INFO:root:okx sell order at 31408
+INFO:root:Huobi buy order at 31407.2
+INFO:root:okx sell order at 31408
+-------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi buy order at 31407.2
+INFO:root:okx sell order at 31408
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31407.2
+INFO:root:okx buy order at 31406.7
+INFO:root:Huobi buy order at 31407.2
+INFO:root:okx sell order at 31408
+-------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31407.2
+INFO:root:okx buy order at 31405.6
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 31406.4
+INFO:root:okx buy order at 31405.5
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi buy order at 31406.4
+INFO:root:okx sell order at 31408
+INFO:root:Huobi sell order at 31406.4
+INFO:root:okx buy order at 31405.5
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi buy order at 31406.4
+INFO:root:okx sell order at 31406.6
+-------------------------------------------------------------------------------------------
+
+
+```
 
