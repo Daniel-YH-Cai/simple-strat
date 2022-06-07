@@ -24,90 +24,78 @@ After the Market data aggregator is started, it will push data in the following 
 Here `"ts"` is the timestamp of the ticker in milliseconds (not the time when the message was received or sent by server).
 In this example, the timestamp of huobi and okx differs by 500ms. Part of the reason is system latency. Moreover, huobi and okx push data at different rates which might also lead to timestamp misalignment.
 ## Simple Strategy explained
-* Simple strategy make trading decision based on every individual market data. 
+* Simple strategy make trading decision based on every individual market data. Orders are placed if bids exceed asks for `self.threshold` amount.
 ```
-    def strategy(self,body):
-        self._parseInput(body)
-        huobi_ticks=self._huobi_ask_bid()
-        okx_ticks=self._okx_ask_bid()
-        try:
-            print("-------------------------------------------------------------------------------------------")
-            if huobi_ticks['asks'][0][PRICE]>okx_ticks['bids'][0][PRICE] or huobi_ticks['bids'][0][PRICE]>okx_ticks['asks'][0][PRICE]:
-                logging.info("Huobi sell order at " +str(huobi_ticks['asks'][0][PRICE]))
-                logging.info("okx buy order at "+str(okx_ticks['bids'][0][PRICE]))
-            elif huobi_ticks['asks'][0][PRICE]<okx_ticks['bids'][0][PRICE] or huobi_ticks['bids'][0][PRICE]<okx_ticks['asks'][0][PRICE]:
-                logging.info("Huobi buy order at "+str(huobi_ticks['asks'][0][PRICE]))
-                logging.info("okx sell order at "+str(okx_ticks['bids'][0][PRICE]))
+        def strategy(self,body):
+          self._parseInput(body)
+          huobi_ticks=self._huobi_ask_bid()
+          okx_ticks=self._okx_ask_bid()
+          try:
+              print("-------------------------------------------------------------------------------------------")
+              if  huobi_ticks['bids'][0][PRICE]-okx_ticks['asks'][0][PRICE]>self.threshold:
+                  logging.info("Huobi sell order at " +str(huobi_ticks['bids'][0][PRICE]))
+                  logging.info("okx buy order at "+str(okx_ticks['asks'][0][PRICE]))
 
-        except IndexError:
-            logging.info("No asks or bids")
+              elif okx_ticks['bids'][0][PRICE]-huobi_ticks['asks'][0][PRICE]>self.threshold:
+                  logging.info("Huobi buy order at "+str(huobi_ticks['asks'][0][PRICE]))
+                  logging.info("okx sell order at "+str(okx_ticks['bids'][0][PRICE]))
+              else:
+                  print("No arbitrage opportunity")
+          except IndexError:
+              logging.info("No asks or bids")
 ```
 * Result:
 Sell and buy order are made per message. Note that no actual order is submitted to the exchanges. Ideally, a strategy should also monitor whether an order is excuted successfully yet this is not included in this demo (TODO).
 
 ```
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31400.6
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31396.6
+No arbitrage opportunity
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31397.4
+No arbitrage opportunity
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31397.3
+No arbitrage opportunity
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31400.6
+No arbitrage opportunity
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31388.8
+INFO:root:Huobi sell order at 30154.7
+INFO:root:okx buy order at 30136.1
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31188.2
+INFO:root:Huobi buy order at 30133.5
+INFO:root:okx sell order at 30143.1
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31366.8
+No arbitrage opportunity
 -------------------------------------------------------------------------------------------
+No arbitrage opportunity
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31349.5
-INFO:root:Huobi sell order at 31402.0
-INFO:root:okx buy order at 31394.2
--------------------------------------------------------------------------------------------
-INFO:root:No asks or bids
+No arbitrage opportunity
+INFO:root:Huobi sell order at 30138.8
+INFO:root:okx buy order at 30130
 -------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi buy order at 31402.0
-INFO:root:okx sell order at 31408
-INFO:root:Huobi buy order at 31407.2
-INFO:root:okx sell order at 31408
+No arbitrage opportunity
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 30129.0
+INFO:root:okx buy order at 30071.6
+INFO:root:Huobi buy order at 30070.4
+INFO:root:okx sell order at 30081.4
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi sell order at 30078.0
+INFO:root:okx buy order at 30059.3
+-------------------------------------------------------------------------------------------
+INFO:root:Huobi buy order at 30073.4
+INFO:root:okx sell order at 30102.7
 -------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi buy order at 31407.2
-INFO:root:okx sell order at 31408
+No arbitrage opportunity
+INFO:root:Huobi buy order at 30088.4
+INFO:root:okx sell order at 30102.4
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31407.2
-INFO:root:okx buy order at 31406.7
-INFO:root:Huobi buy order at 31407.2
-INFO:root:okx sell order at 31408
+INFO:root:Huobi sell order at 30105.1
+INFO:root:okx buy order at 30097.2
 -------------------------------------------------------------------------------------------
 -------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31407.2
-INFO:root:okx buy order at 31405.6
--------------------------------------------------------------------------------------------
-INFO:root:Huobi sell order at 31406.4
-INFO:root:okx buy order at 31405.5
--------------------------------------------------------------------------------------------
-INFO:root:Huobi buy order at 31406.4
-INFO:root:okx sell order at 31408
-INFO:root:Huobi sell order at 31406.4
-INFO:root:okx buy order at 31405.5
--------------------------------------------------------------------------------------------
-INFO:root:Huobi buy order at 31406.4
-INFO:root:okx sell order at 31406.6
--------------------------------------------------------------------------------------------
+INFO:root:Huobi buy order at 30100.6
+INFO:root:okx sell order at 30110.8
 
 
 ```
