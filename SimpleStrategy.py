@@ -5,12 +5,13 @@ PRICE=0
 QUANTITY=0
 class SimpleStrategy:
 
-    def __init__(self,gateway,threshold):
+    def __init__(self,gateway,threshold,monitor=None):
         self.orders=[]
         self.gateway=None
         self._current_data=None
         self.threshold=threshold
-        self.orders=[]
+        self.monitor=monitor
+
 
     def _parseInput(self,body):
         self._current_data=json.loads(body)
@@ -40,7 +41,10 @@ class SimpleStrategy:
                 logging.info("okx sell order at "+str(okx_ticks['bids'][0][PRICE]))
             else:
                 print("No arbitrage opportunity")
-
+            if self.monitor is not None:
+                self.monitor.record_spread(max(huobi_ticks['bids'][0][PRICE]-okx_ticks['asks'][0][PRICE],okx_ticks['bids'][0][PRICE]-huobi_ticks['asks'][0][PRICE]))
+                self.monitor.record_time(huobi_ts=huobi_ticks['ts'],okx_ts=int(okx_ticks['ts']))
+                self.monitor.write()
         except IndexError:
             logging.info("No asks or bids")
 
