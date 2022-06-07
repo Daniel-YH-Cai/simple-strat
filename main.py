@@ -5,7 +5,7 @@ import aioamqp
 
 from SimpleStrategy import SimpleStrategy
 
-demo_strat=SimpleStrategy(None)
+demo_strat=SimpleStrategy(None,5.0)
 
 async def callback(channel, body, envelope, properties):
     demo_strat.strategy(body)
@@ -26,7 +26,10 @@ async def connect():
     await channel.queue_declare(queue_name,auto_delete=True)
     await channel.queue_bind(queue_name,exchange_name,routing_key)
     while True:
-        await channel.basic_consume(callback, queue_name=queue_name)
+        try:
+            await channel.basic_consume(callback, queue_name=queue_name)
+        except KeyboardInterrupt:
+            break
 
 
 

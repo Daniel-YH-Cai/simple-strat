@@ -5,10 +5,11 @@ PRICE=0
 QUANTITY=0
 class SimpleStrategy:
 
-    def __init__(self,gateway):
+    def __init__(self,gateway,threshold):
         self.orders=[]
         self.gateway=None
         self._current_data=None
+        self.threshold=threshold
         self.orders=[]
 
     def _parseInput(self,body):
@@ -29,11 +30,17 @@ class SimpleStrategy:
         huobi_ticks=self._huobi_ask_bid()
         okx_ticks=self._okx_ask_bid()
         try:
-            if huobi_ticks['asks'][0][PRICE]>okx_ticks['bids'][0][PRICE]:
-                logging.info("Huobi sell order at " +str(huobi_ticks['asks'][0][PRICE]))
-                logging.info("okx buy order at "+str(okx_ticks['bids'][0][PRICE]))
-            elif huobi_ticks['asks'][0][PRICE]<okx_ticks['bids'][0][PRICE]:
+            print("-------------------------------------------------------------------------------------------")
+            if  huobi_ticks['bids'][0][PRICE]-okx_ticks['asks'][0][PRICE]>self.threshold:
+                logging.info("Huobi sell order at " +str(huobi_ticks['bids'][0][PRICE]))
+                logging.info("okx buy order at "+str(okx_ticks['asks'][0][PRICE]))
+
+            elif okx_ticks['bids'][0][PRICE]-huobi_ticks['asks'][0][PRICE]>self.threshold:
                 logging.info("Huobi buy order at "+str(huobi_ticks['asks'][0][PRICE]))
                 logging.info("okx sell order at "+str(okx_ticks['bids'][0][PRICE]))
+            else:
+                print("No arbitrage opportunity")
+
         except IndexError:
             logging.info("No asks or bids")
+
