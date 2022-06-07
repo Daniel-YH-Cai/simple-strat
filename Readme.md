@@ -51,12 +51,6 @@ Sell and buy order are made per message. Note that no actual order is submitted 
 -------------------------------------------------------------------------------------------
 No arbitrage opportunity
 -------------------------------------------------------------------------------------------
-No arbitrage opportunity
--------------------------------------------------------------------------------------------
-No arbitrage opportunity
--------------------------------------------------------------------------------------------
-No arbitrage opportunity
--------------------------------------------------------------------------------------------
 INFO:root:Huobi sell order at 30154.7
 INFO:root:okx buy order at 30136.1
 -------------------------------------------------------------------------------------------
@@ -76,8 +70,6 @@ No arbitrage opportunity
 -------------------------------------------------------------------------------------------
 INFO:root:Huobi sell order at 30129.0
 INFO:root:okx buy order at 30071.6
-INFO:root:Huobi buy order at 30070.4
-INFO:root:okx sell order at 30081.4
 -------------------------------------------------------------------------------------------
 INFO:root:Huobi sell order at 30078.0
 INFO:root:okx buy order at 30059.3
@@ -85,18 +77,37 @@ INFO:root:okx buy order at 30059.3
 INFO:root:Huobi buy order at 30073.4
 INFO:root:okx sell order at 30102.7
 -------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------
-No arbitrage opportunity
 INFO:root:Huobi buy order at 30088.4
 INFO:root:okx sell order at 30102.4
 -------------------------------------------------------------------------------------------
 INFO:root:Huobi sell order at 30105.1
 INFO:root:okx buy order at 30097.2
 -------------------------------------------------------------------------------------------
--------------------------------------------------------------------------------------------
 INFO:root:Huobi buy order at 30100.6
 INFO:root:okx sell order at 30110.8
 
 
 ```
-
+## Performance Monitoring
+You can monitor the quality of data by passing a monitor class to the strategy. The monitor can be used to record the spread, latency and misalignment of data.
+Here, spread is the difference between bids and asks. Latency is current time minus the timestamp of the ticker in miliseconds. Misalignments is the difference between the timestamp of okx and huobi.
+```
+Spread         Latency        Misalignment                      
+-0.40          2327           569            
+2.30           2320           548            
+2.30           2323           566            
+8.80           2321           560            
+5.70           2321           548            
+2.60           2322           537            
+3.50           2321           541            
+0.50           2323           536            
+4.30           2337           532            
+-1.70          2324           523            
+1.20           2323           524            
+4.10           2321           517            
+0.50           2319           509            
+3.50           2328           617            
+0.80           2448           501            
+0.10           2388           612            
+2.60           2321           504           
+```
